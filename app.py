@@ -1,6 +1,8 @@
 import streamlit as st
 import pickle
 import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(page_title="AI Movie Recommender", layout="wide")
@@ -9,7 +11,11 @@ st.set_page_config(page_title="AI Movie Recommender", layout="wide")
 movies_dict = pickle.load(open('movie_dict.pkl','rb'))
 movies = pd.DataFrame(movies_dict)
 
-similarity = pickle.load(open('similarity.pkl','rb'))
+# ---------------- GENERATE SIMILARITY MATRIX ----------------
+cv = CountVectorizer(max_features=5000, stop_words='english')
+vectors = cv.fit_transform(movies['tags']).toarray()
+
+similarity = cosine_similarity(vectors)
 
 # ---------------- RECOMMEND FUNCTION ----------------
 def recommend(movie):
@@ -58,20 +64,19 @@ transition:0.3s;
 
 
 # ---------------- HERO IMAGE ----------------
-st.image(
-    "C:\\Users\\ANAND\\Desktop\\Machine-learning-projects\\movie-recommandation\\hero.png",
+st.image("hero.png")
 
-)
-
+# ---------------- TITLE ----------------
 st.title("🎬 AI Movie Recommendation System")
 st.write("Find movies similar to the one you love.")
 
+# ---------------- MOVIE SELECT ----------------
 selected_movie = st.selectbox(
     "Search your favorite movie",
     movies['title'].values
 )
 
-# ---------------- RECOMMEND BUTTON
+# ---------------- RECOMMEND BUTTON ----------------
 if st.button("Recommend 🍿"):
 
     with st.spinner("Finding the best movies for you... 🍿"):
